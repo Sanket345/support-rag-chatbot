@@ -1,3 +1,4 @@
+import os
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -9,15 +10,18 @@ from .vector_store import get_embeddings
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    get_embeddings()  # load the model at startup so the first request is fast
+    get_embeddings()
     yield
 
 
 app = FastAPI(title="Support RAG Chatbot", lifespan=lifespan)
 
+# Comma-separated list of allowed websites, set as an environment variable on Render.
+origins = [o.strip() for o in os.getenv("ALLOWED_ORIGINS", "http://localhost:5173").split(",")]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173"],
+    allow_origins=origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )

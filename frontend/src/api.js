@@ -1,4 +1,5 @@
-// All calls to the backend live here. No API keys: the key stays in backend/.env.
+// In production, VITE_API_URL is the Render backend URL. Locally it's empty and the Vite proxy is used.
+const BASE = import.meta.env.VITE_API_URL || "";
 
 async function handle(res) {
   if (!res.ok) {
@@ -11,19 +12,21 @@ async function handle(res) {
   return res.json();
 }
 
-export const getDocuments = () => fetch("/api/documents").then(handle);
+export const getDocuments = () => fetch(`${BASE}/api/documents`).then(handle);
 
 export function uploadFiles(files) {
   const form = new FormData();
   files.forEach((f) => form.append("files", f));
-  return fetch("/api/upload", { method: "POST", body: form }).then(handle);
+  return fetch(`${BASE}/api/upload`, { method: "POST", body: form }).then(
+    handle,
+  );
 }
 
 export const clearDocuments = () =>
-  fetch("/api/documents", { method: "DELETE" }).then(handle);
+  fetch(`${BASE}/api/documents`, { method: "DELETE" }).then(handle);
 
 export const sendChat = (question, history) =>
-  fetch("/api/chat", {
+  fetch(`${BASE}/api/chat`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ question, history }),
